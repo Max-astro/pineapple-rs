@@ -4,7 +4,7 @@ mod parser;
 use backend::*;
 use lexer::*;
 use parser::*;
-use std::{env, fs, process};
+use std::{env, fs};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let file = env::args().last().unwrap();

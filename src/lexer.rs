@@ -21,9 +21,9 @@ pub struct Lexer {
     source: Vec<String>,
     line: usize,
     ptr: usize,
-    pub nextTokenInfo: TokenType,
-    nextToken: Token,
-    keyWords: HashMap<String, TokenType>,
+    pub next_token_info: TokenType,
+    next_token: Token,
+    key_words: HashMap<String, TokenType>,
 }
 
 impl Lexer {
@@ -34,14 +34,10 @@ impl Lexer {
             source: source.split('\n').map(|s| s.to_string()).collect(),
             line: 0,
             ptr: 0,
-            nextTokenInfo: TokenType::None,
-            nextToken: Token(TokenType::None, 0, None),
-            keyWords: hash,
+            next_token_info: TokenType::None,
+            next_token: Token(TokenType::None, 0, None),
+            key_words: hash,
         }
-    }
-
-    pub fn print(&self) {
-        println!("{:?}", self.source);
     }
 
     fn scan_name(&self, s: &str, start: usize) -> (usize, String) {
@@ -72,9 +68,9 @@ impl Lexer {
     }
 
     pub fn get_next_token(&mut self) -> Token {
-        if self.nextTokenInfo != TokenType::None {
-            self.nextTokenInfo = TokenType::None;
-            return self.nextToken.clone();
+        if self.next_token_info != TokenType::None {
+            self.next_token_info = TokenType::None;
+            return self.next_token.clone();
         }
 
         if self.ptr >= self.source[self.line].len() {
@@ -92,28 +88,28 @@ impl Lexer {
         self.ptr += 1;
         let c = current_line.next().unwrap();
         match c {
-            '$' => return Token(TokenType::VarPrefix, self.line, None),
+            '$' => Token(TokenType::VarPrefix, self.line, None),
 
-            '(' => return Token(TokenType::LeftBracket, self.line, None),
+            '(' => Token(TokenType::LeftBracket, self.line, None),
 
-            ')' => return Token(TokenType::RightBracket, self.line, None),
+            ')' => Token(TokenType::RightBracket, self.line, None),
 
-            '=' => return Token(TokenType::Equal, self.line, None),
+            '=' => Token(TokenType::Equal, self.line, None),
             '"' => {
                 let (i, s) = self.scan_string(&self.source[self.line], self.ptr);
                 self.ptr += i;
-                return Token(TokenType::String, self.line, Some(s));
+                Token(TokenType::String, self.line, Some(s))
             }
             '_' | 'A'..='z' => {
                 let (i, s) = self.scan_name(&self.source[self.line], self.ptr - 1);
                 self.ptr += i - 1;
-                if let Some(token_type) = self.keyWords.get(&s) {
-                    return Token(token_type.clone(), self.line, Some(s));
+                if let Some(token_type) = self.key_words.get(&s) {
+                    Token(*token_type, self.line, Some(s))
                 } else {
-                    return Token(TokenType::Name, self.line, Some(s));
+                    Token(TokenType::Name, self.line, Some(s))
                 }
             }
-            ' ' | '\n' | '\r' | '\t' => return Token(TokenType::Ignored, self.line, None),
+            ' ' | '\n' | '\r' | '\t' => Token(TokenType::Ignored, self.line, None),
             _ => panic!(
                 "MatchToken(): unexpected symbol {} {}:{} | {}",
                 c,
@@ -128,7 +124,7 @@ impl Lexer {
         let now_type = self.get_next_token();
         if token_type != now_type.0 {
             panic!(
-                "NextTokenIs(): expect {:?} found {:?}",
+                "next_tokenIs(): expect {:?} found {:?}",
                 token_type, now_type
             );
         }
@@ -137,8 +133,8 @@ impl Lexer {
 
     pub fn lookahead(&mut self) -> Token {
         let now_type = self.get_next_token();
-        self.nextToken = now_type.clone();
-        self.nextTokenInfo = now_type.0;
+        self.next_token = now_type.clone();
+        self.next_token_info = now_type.0;
         now_type
     }
 }

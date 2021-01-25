@@ -2,7 +2,7 @@ use crate::*;
 use std::collections::HashMap;
 
 pub trait Statement {
-    fn resolve(&self, interp: &mut Interpreter) {}
+    fn resolve(&self, _interp: &mut Interpreter) {}
 }
 
 impl Statement for Assignment {
@@ -32,7 +32,7 @@ impl std::fmt::Display for Interpreter {
 }
 
 impl Interpreter {
-    pub fn new(mut lexer: Lexer) -> Self {
+    pub fn new(lexer: Lexer) -> Self {
         let variables = HashMap::new();
         Interpreter { lexer, variables }
     }
